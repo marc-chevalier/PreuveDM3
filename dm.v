@@ -41,9 +41,20 @@ Definition extensional {X Y : setoid} (f : set X → set Y) :=
 Hint Unfold extensional.
 Definition arrow_setoid (X : setoid) (Y : setoid) : setoid.
 refine (mkSetoid (set := { f : set X → set Y | extensional f })
-                 (R := (fun f g => (* to do *)))  (* to do *)
+                 (R := (fun f g => forall (x : set X), R Y (proj1_sig f x) (proj1_sig g x)))  (* to do *)
                  _).
-(* to do *)
+apply mkEq.
+intros f x.
+apply R_eq.
+intros f g H x.
+apply symm.
+apply R_eq.
+apply H.
+intros f g h H H0 x.
+apply trans with (proj1_sig g x).
+apply R_eq.
+apply H.
+apply H0.
 Defined.
 Notation "X ⇒ Y" := (arrow_setoid X Y) (at level 80).
 
@@ -52,11 +63,18 @@ Definition omniscient (X : setoid) :=
     (exists x, proj1_sig p x = false) \/ (forall x, proj1_sig p x = true).
 
 (* Question 2. *)
-Definition searchable (X : setoid) := (* to do *).
+Definition searchable (X : setoid) := 
+  forall p : set (X ⇒ bool_setoid),
+  exists epsilon : (set(X ⇒ bool_setoid)) -> set X,
+  proj1_sig p (epsilon (p)) = true -> 
+    (forall x, proj1_sig p x = true).
+
 
 (* Question 3. *)
 Lemma searchable_implies_omniscient : forall X, searchable X -> omniscient X.
 Proof.
+  intros X H p.
+  
 
 Qed.
 
@@ -143,7 +161,8 @@ Qed.
 (* Question 17. *)
 Lemma finite_falsification : 
   forall p : set (ℕ∞ ⇒ bool_setoid), 
-    (exists x, (¬ (x ≡ ω) /\ proj1_sig p x = false)) \/ (forall n, proj1_sig p (of_nat n) = true).
+    (exists x, (¬ (x ≡ ω) /\ proj1_sig p x = false)) \/
+(forall n, proj1_sig p (of_nat n) = true).
 Proof.
 (* to do *)
 Qed.
