@@ -43,18 +43,20 @@ Definition arrow_setoid (X : setoid) (Y : setoid) : setoid.
 refine (mkSetoid (set := { f : set X → set Y | extensional f })
                  (R := (fun f g => forall (x : set X), R Y (proj1_sig f x) (proj1_sig g x)))  (* to do *)
                  _).
-apply mkEq.
-intros f x.
-apply R_eq.
-intros f g H x.
-apply symm.
-apply R_eq.
-apply H.
-intros f g h H H0 x.
-apply trans with (proj1_sig g x).
-apply R_eq.
-apply H.
-apply H0.
+  apply mkEq.
+  intros f x.
+  apply R_eq.
+
+  intros f g H x.
+  apply symm.
+    apply R_eq.
+ 
+  apply H.
+  intros f g h H H0 x.
+  apply trans with (proj1_sig g x).
+    apply R_eq.
+    apply H.
+  apply H0.
 Defined.
 Notation "X ⇒ Y" := (arrow_setoid X Y) (at level 80).
 
@@ -64,8 +66,8 @@ Definition omniscient (X : setoid) :=
 
 (* Question 2. *)
 Definition searchable (X : setoid) := 
-  forall p : set (X ⇒ bool_setoid),
   exists epsilon : (set(X ⇒ bool_setoid)) -> set X,
+  forall p : set (X ⇒ bool_setoid),
   proj1_sig p (epsilon (p)) = true -> 
     (forall x, proj1_sig p x = true).
 
@@ -73,8 +75,23 @@ Definition searchable (X : setoid) :=
 (* Question 3. *)
 Lemma searchable_implies_omniscient : forall X, searchable X -> omniscient X.
 Proof.
-  intros X H p.
-  
+  intros X H.
+  unfold searchable in H.
+  unfold omniscient.
+  intros p.
+  destruct H as [epsilon].
+ 
+  assert (H_cases : proj1_sig p (epsilon p) = true \/ proj1_sig p (epsilon p) = false).
+  destruct (proj1_sig p (epsilon p));
+  auto.
+  destruct H_cases as [H_case_true|H_case_false].
+  right.
+  apply H.
+  apply H_case_true.
+
+  left.
+  exists (epsilon p).
+  apply H_case_false.
 
 Qed.
 
