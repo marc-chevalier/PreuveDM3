@@ -64,8 +64,8 @@ Definition omniscient (X : setoid) :=
 
 (* Question 2. *)
 Definition searchable (X : setoid) := 
-  forall p : set (X ⇒ bool_setoid),
   exists epsilon : (set(X ⇒ bool_setoid)) -> set X,
+  forall p : set (X ⇒ bool_setoid),
   proj1_sig p (epsilon (p)) = true -> 
     (forall x, proj1_sig p x = true).
 
