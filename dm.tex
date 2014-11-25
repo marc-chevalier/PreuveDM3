@@ -12,8 +12,33 @@
 
 \section*{Question 3}
 
-Non, la réciproque est fausse. Il suffit en particulier de prendre un type vide.
+Non, la réciproque est fausse. Il suffit en particulier de prendre un setoïd vide. Ce setoïd est omniscient ($\forall x\in \emptyset, P(x)$) mais n'est pas recherchable. En effet, il faudrait que la fonction de sélection renvoie un élément qui puisse être pris comme argument d'un prédicat qui prend ses paramètres dans un setoïd vide.
 
 \section*{Question 10}
+
+Soit $\alpha\in\NN_\infty$. $\NN_\infty$ est le sétoïd contenant les suites à valeurs dans $\set{0,1}$ décroissantes donc $(\forall x\in \NN, \alpha(x) = 1) \vee (\exists n\in\NN : \forall n'\in\NN, n'<n \Rightarrow \alpha(n')=1 \wedge n'\geqslant n \Rightarrow \alpha(n')=0)$
+
+On distingue alors 2 cas.
+
+$1^\text{er}$ cas : $\forall x\in \NN, \alpha(x) = 1$.
+Il s'agit de $\omega$.
+
+$^\text{nd}$ cas : il existe $n$ tel que $\forall n'\in\NN, n'<n \Rightarrow \alpha(n')=1 \wedge n'\geqslant n \Rightarrow \alpha(n')=0$.
+Il s'agit alors de \texttt{of\_nat}$(k)$.
+
+Donc $\NN_\infty \subseteq \texttt{of\_nat}(\NN)\cup\set{\omega}$
+
+Réciproquement, on prend un élément de $\texttt{of\_nat}(\NN)\cup\set{\omega}$. S'il s'agit de $\omega$, il s'agit bien d'une suite décroissante donc de $\NN_\infty$. S'il s'agit d'un élément de $\texttt{of\_nat}(\NN)$, il s'agit également évidemment d'un élément de $\NN_\infty$.
+
+D'où $\texttt{of\_nat}(\NN)\cup\set{\omega} \subseteq \NN_\infty$.
+
+Donc $\texttt{of\_nat}(\NN)\cup\set{\omega} = \NN_\infty$.
+
+
+\section*{Question 12}
+
+Pour une machine de \textsc{Turing} $M$ et une entrée $x$, on définit le prédicat $P_{M,x}(k)$ qui est faux si la machine est arrêté au bout de $k$ étapes et vrai sinon. Pour tout machine de \textsc{Turing} $M$ et entrée $x$, on a $A:=\forall n, P_{M,x}(n)$ (la machine ne s'arrête pas) ou $B:=\exists n : \neg P_{M,x}(n)$ (la machine s'arrête). La suite $n\mapsto P_{M,x}(n)$ est évidemment dans $\NN_\infty$ (une machine arrêtée ne peut pas repartir toute seule).
+
+De plus, il est certain qu'un machine s'arrête à une certaine étape (qu'on note $k$) ou ne s'arrête pas. On a donc $\vdash A\vee B$. Par contre, il est impossible de montrer $\vdash A$ ou $\vdash B$ sinon le problème de l'arrêt serait décidable. Or il est connu pour être indécidable.
 
 \end{document}
