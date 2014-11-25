@@ -13,6 +13,7 @@ Require Import Arith.
 Require Import Omega.
 Require Import FunctionalExtensionality.
 Require Import Coq.Arith.Peano_dec.
+Require Import Coq.Bool.Bool.
 
 Record equivalence {X : Set} (R : X → X → Prop) : Set := 
   mkEq {
@@ -41,22 +42,24 @@ Definition extensional {X Y : setoid} (f : set X → set Y) :=
 Hint Unfold extensional.
 Definition arrow_setoid (X : setoid) (Y : setoid) : setoid.
 refine (mkSetoid (set := { f : set X → set Y | extensional f })
-                 (R := (fun f g => forall (x : set X), R Y (proj1_sig f x) (proj1_sig g x)))  (* to do *)
+                 (R := (fun f g => forall (x:set X), R Y ((proj1_sig f) x) ((proj1_sig g) x)))
                  _).
-  apply mkEq.
-  intros f x.
+apply mkEq.
+  intros.
+  apply refl.
   apply R_eq.
 
-  intros f g H x.
+  intros.
   apply symm.
     apply R_eq.
- 
-  apply H.
-  intros f g h H H0 x.
-  apply trans with (proj1_sig g x).
-    apply R_eq.
+
     apply H.
-  apply H0.
+
+  intros.
+    apply trans with (proj1_sig y x0).
+      apply R_eq.
+      auto.
+      auto.
 Defined.
 Notation "X ⇒ Y" := (arrow_setoid X Y) (at level 80).
 
@@ -65,34 +68,22 @@ Definition omniscient (X : setoid) :=
     (exists x, proj1_sig p x = false) \/ (forall x, proj1_sig p x = true).
 
 (* Question 2. *)
-Definition searchable (X : setoid) := 
-  exists epsilon : (set(X ⇒ bool_setoid)) -> set X,
-  forall p : set (X ⇒ bool_setoid),
-  proj1_sig p (epsilon (p)) = true -> 
-    (forall x, proj1_sig p x = true).
-
+Definition searchable (X : setoid) := exists (eps:set (X ⇒ bool_setoid) -> set X), forall (p:set (X ⇒ bool_setoid)), ((proj1_sig p) (eps p)) = true -> forall x, (proj1_sig p) x = true.
 
 (* Question 3. *)
 Lemma searchable_implies_omniscient : forall X, searchable X -> omniscient X.
 Proof.
-  intros X H.
-  unfold searchable in H.
-  unfold omniscient.
-  intros p.
-  destruct H as [epsilon].
- 
-  assert (H_cases : proj1_sig p (epsilon p) = true \/ proj1_sig p (epsilon p) = false).
-  destruct (proj1_sig p (epsilon p));
-  auto.
-  destruct H_cases as [H_case_true|H_case_false].
-  right.
-  apply H.
-  apply H_case_true.
+  intros.
+  intro.
+  destruct H.
+  destruct (proj1_sig p (x p)) eqn:H1.
+    right.
+    apply H.
+    apply H1.
 
-  left.
-  exists (epsilon p).
-  apply H_case_false.
-
+    left.
+    exists (x p).
+    apply H1.
 Qed.
 
 (* Question 4. *)
@@ -103,19 +94,31 @@ Defined.
 
 Lemma finites_are_omniscient : forall k, omniscient (finite_setoid k).
 Proof.
-(* to do *)
-Qed.
+  intros.
+  apply searchable_implies_omniscient.
+Admitted.
 
 (* Question 5. *)
-Fixpoint min (f : nat → bool) (n:nat) := 
-  (* to do *)
+Fixpoint min (f : nat → bool) (n:nat) :=
+  match n with
+      0 => (f 0)
+    | S k => if (f (S k)) then (min f k) else false
+  end.
 
 (* Question 6. *)
 Lemma compute_minimum : 
   forall f n, min f n = false -> exists p, f p = false ∧ (forall k, k < p -> f k = true).
 Proof.
-(* to do *)
-Qed.
+  intros.
+  induction n.
+    exists 0.
+    split.
+      apply H.
+      intros.
+      omega.
+
+    (* on veux dire que si a est vrai alors if a then b else c = b et on peux appliquer l'hypothèse d'induction*)
+Admitted.
 
 (* Question 7. *)
 Definition Decreasing (α : nat -> bool) := 
@@ -123,9 +126,17 @@ Definition Decreasing (α : nat -> bool) :=
 Definition N_infty : setoid.
 refine (mkSetoid 
           (set := { α : nat -> bool | Decreasing α })
-          (R := fun α β => (* to do *))
+          (R := fun α β => forall x, proj1_sig α x = proj1_sig β x)
           _).
-(* to do *)
+apply mkEq.
+  auto.
+
+  intros.
+  auto.
+
+  intros.
+  rewrite H.
+  auto.
 Defined.
 Notation "ℕ∞" := N_infty.
 Notation "x ≡ y" := (R N_infty x y) (at level 80). (* ≡ représente l'égalité sur ℕ∞ *)
@@ -133,12 +144,68 @@ Notation "x ≡ y" := (R N_infty x y) (at level 80). (* ≡ représente l'égali
 (* Question 8. *)
 Definition ω : set ℕ∞.
 refine (exist _ (fun x => true) _).
-(* to do *)
+intro.
+intros.
+trivial.
 Defined.
 
 (* Question 9. *)
+
+(* comparaison entre entier renvoyant bool*)
+
+Fixpoint gtb (a b : nat) :=
+match (a, b) with
+  | (0, _) => false
+  | (_, 0) => true
+  | (S c, S d) => gtb c d
+end.
+
+
+Lemma gt_bool_prop2 : forall a b, gtb a b = true <-> a > b.
+Proof.
+intros.
+induction a.
+  intros.
+  split.
+    intros.
+    unfold gtb in H.
+    inversion H.
+
+    omega.
+
+  intros.
+  split.
+    intro H.
+    induction b.
+      omega.
+
+    unfold gtb in H.
+    fold gtb in H.
+    apply IHa in H.
+
+omega.
+
+
+intro H.
+
+unfold gt_bool.
+
+fold gt_bool.
+
+destruct k.
+
+reflexivity.
+
+apply IHx.
+
+omega.
+
+Qed.
+
+
 Definition of_nat (k : nat) : set ℕ∞.
-(* to do *)
+ refine (exist _ (fun x => k <= x) _).
+
 Defined.
 
 (* Question 11. *)
@@ -178,8 +245,7 @@ Qed.
 (* Question 17. *)
 Lemma finite_falsification : 
   forall p : set (ℕ∞ ⇒ bool_setoid), 
-    (exists x, (¬ (x ≡ ω) /\ proj1_sig p x = false)) \/
-(forall n, proj1_sig p (of_nat n) = true).
+    (exists x, (¬ (x ≡ ω) /\ proj1_sig p x = false)) \/ (forall n, proj1_sig p (of_nat n) = true).
 Proof.
 (* to do *)
 Qed.
