@@ -96,6 +96,9 @@ Lemma finites_are_omniscient : forall k, omniscient (finite_setoid k).
 Proof.
   intros.
   apply searchable_implies_omniscient.
+
+  (* On prouve que les "finites" sont "searchable" *)
+  unfold searchable.
 Admitted.
 
 (* Question 5. *)
@@ -160,47 +163,7 @@ match (a, b) with
   | (S c, S d) => gtb c d
 end.
 
-
-(* Deux lemmes utiles : je me permet de les admettre car ils ne sont pas dans l'objectif du DM*)
-Lemma gtb_true : forall a b, gtb a b = true <-> a > b.
-Proof.
-Admitted.
-(*intros.
-induction a.
-  intros.
-  split.
-    intros.
-    unfold gtb in H.
-    inversion H.
-
-    omega.
-
-  intros.
-  split.
-    intro H.
-    induction b.
-      omega.
-
-    unfold gtb in H.
-    fold gtb in H.
-    apply IHa in H.
-
-omega.
-
-intro H.
-
-unfold gt_bool.
-
-fold gt_bool.
-
-destruct k.
-
-reflexivity.
-
-apply IHx.
-
-omega.*)
-
+(*un lemme utile admis car pas dans l'objectif du DM*)
 Lemma gtb_false : forall a b, gtb a b = false <-> a <= b.
 Proof.
 Admitted.
@@ -249,11 +212,28 @@ Theorem N_infty_omniscient : omniscient ℕ∞.
 Proof.
   unfold omniscient.
   intros.
-Admitted.
+  assert (proj1_sig p (ε p) = true \/ proj1_sig p (ε p) = false).
+  case (proj1_sig p (ε p)).
+    left.
+    trivial.
+
+    right.
+    trivial.
+
+  destruct H.
+    right.
+    apply ε_correct.
+    trivial.
+
+    left.
+    exists (ε p).
+    trivial.
+Qed.
 
 (* Question 17. *)
 Lemma finite_falsification : 
   forall p : set (ℕ∞ ⇒ bool_setoid), 
     (exists x, (¬ (x ≡ ω) /\ proj1_sig p x = false)) \/ (forall n, proj1_sig p (of_nat n) = true).
 Proof.
+  intros.
 Admitted.
