@@ -161,9 +161,11 @@ match (a, b) with
 end.
 
 
-Lemma gt_bool_prop2 : forall a b, gtb a b = true <-> a > b.
+(* Deux lemmes utiles : je me permet de les admettre car ils ne sont pas dans l'objectif du DM*)
+Lemma gtb_true : forall a b, gtb a b = true <-> a > b.
 Proof.
-intros.
+Admitted.
+(*intros.
 induction a.
   intros.
   split.
@@ -185,7 +187,6 @@ induction a.
 
 omega.
 
-
 intro H.
 
 unfold gt_bool.
@@ -198,21 +199,25 @@ reflexivity.
 
 apply IHx.
 
-omega.
+omega.*)
 
-Qed.
-
+Lemma gtb_false : forall a b, gtb a b = false <-> a <= b.
+Proof.
+Admitted.
 
 Definition of_nat (k : nat) : set ℕ∞.
- refine (exist _ (fun x => k <= x) _).
-
+  refine (exist _ (gtb k) _).
+  unfold Decreasing.
+  intros.
+  apply gtb_false.
+  apply gtb_false in H0.
+  omega.
 Defined.
 
 (* Question 11. *)
 Lemma LPO_equiv : omniscient ℕ <-> forall x : set ℕ∞, x ≡ ω \/ exists k, x ≡ of_nat k.
 Proof.
-(* to do *)
-Qed.
+Admitted.
 
 (* Question 13. *)
 Lemma density : 
@@ -221,31 +226,34 @@ Lemma density :
     (forall k, proj1_sig p (of_nat k) = true) -> 
     forall x, proj1_sig p x = true.
 Proof.
-(* to do *)
-Qed.
+Admitted.
 
 (* Question 14. *)
 Definition ε (p : set (ℕ∞ ⇒ bool_setoid)) : set ℕ∞.
 refine (exist _ (fun n => min (fun m => proj1_sig p (of_nat m)) n) _).
-(* to do *)
-Defined.
+Admitted.
 
 (* Question 15. *)
-Lemma ε_correct : forall p, p (ε p) = true <-> forall x, p x = true.
+
+Lemma ε_correct : forall p : set (ℕ∞ ⇒ bool_setoid), proj1_sig p (ε p) = true <-> forall x, proj1_sig p x = true.
 Proof.
-(* to do *)
-Qed.
+intros.
+split.
+  intros.
+  apply density.
+     unfold ω.
+Admitted.
 
 (* Question 16. *)
 Theorem N_infty_omniscient : omniscient ℕ∞.
 Proof.
-(* to do *)
-Qed.
+  unfold omniscient.
+  intros.
+Admitted.
 
 (* Question 17. *)
 Lemma finite_falsification : 
   forall p : set (ℕ∞ ⇒ bool_setoid), 
     (exists x, (¬ (x ≡ ω) /\ proj1_sig p x = false)) \/ (forall n, proj1_sig p (of_nat n) = true).
 Proof.
-(* to do *)
-Qed.
+Admitted.
