@@ -102,12 +102,9 @@ Fixpoint epsilon_for_finite (x : nat) {k : nat} (p : set (arrow_setoid (finite_s
   end
 end.
 
-Lemma finites_are_omniscient : forall k, omniscient (finite_setoid k).
+Lemma finites_are_searchable : forall k, searchable (finite_setoid k).
 Proof.
   intros.
-  apply searchable_implies_omniscient.
-
-  (* On prouve que les "finites" sont "searchable" *)
   unfold searchable.
   exists (epsilon_for_finite k).
   induction k.
@@ -129,6 +126,13 @@ Proof.
     rewrite<- H.
     simpl.
     unfold epsilon_for_finite in IHk.
+Admitted.
+
+Lemma finites_are_omniscient : forall k, omniscient (finite_setoid k).
+Proof.
+  intros.
+  apply searchable_implies_omniscient.
+  apply finites_are_searchable.
 Qed.
 
 (* Question 5. *)
@@ -138,7 +142,56 @@ Fixpoint min (f : nat → bool) (n:nat) :=
     | S k => if (f (S k)) then (min f k) else false
   end.
 
+
 (* Question 6. *)
+Lemma if_true : forall (a:bool) (b:bool) (c:bool), (a = true) -> (if a then b else c) = b.
+Proof.
+  intros.
+  replace a with true.
+  trivial.
+Qed.
+
+Lemma if_false : forall (a:bool) (b:bool) (c:bool), (a = false) -> (if a then b else c) = c.
+Proof.
+  intros.
+  replace a with false.
+  trivial.
+Qed.
+
+Lemma no_min : forall f n, min f n = true -> (forall k, k <= n -> f k = true).
+Proof.
+  intros.
+  induction n.
+    assert (k=0).
+      omega.
+    rewrite H1.
+    trivial.
+
+    assert((k <= n) \/ (k = S n)).
+      omega.
+    assert((f (S n) = true) \/ (f (S n) = false)).
+      case (f (S n)).
+        auto.
+        auto.
+    destruct H2.
+      unfold min in H.
+      rewrite if_true in H.
+      destruct H1.
+        apply IHn.
+          trivial.
+          trivial.
+        rewrite H1.
+        trivial.
+      trivial.
+
+      exfalso.
+      unfold min in H.
+      rewrite if_false in H.
+        apply diff_false_true.
+        trivial.
+        trivial.
+Qed.
+
 Lemma compute_minimum : 
   forall f n, min f n = false -> exists p, f p = false ∧ (forall k, k < p -> f k = true).
 Proof.
@@ -150,8 +203,44 @@ Proof.
       intros.
       omega.
 
-    (* on veux dire que si a est vrai alors if a then b else c = b et on peux appliquer l'hypothèse d'induction*)
-Admitted.
+    assert ((f (S n) = false)\/(f (S n) = true)).
+    case (f (S n)).
+      auto.
+      auto.
+
+    destruct H0.
+      assert ((min f n = false)\/(min f n = true)).
+      case (min f n).
+        auto.
+        auto.
+      destruct H1.
+        apply IHn.
+        trivial.
+
+        exists (S n).
+        split.
+          trivial.
+
+          intros.
+          apply no_min with (n:=n).
+          assert((f (S n) = true) \/ (f (S n) = false)).
+          case (f (S n)).
+            auto.
+            auto.
+          destruct H3.
+             unfold min.
+             auto.
+
+             unfold min.
+             auto.
+          omega.
+
+        apply IHn.
+        unfold min in H.
+        rewrite if_true in H.
+          auto.
+          trivial.
+Qed.
 
 (* Question 7. *)
 Definition Decreasing (α : nat -> bool) := 
