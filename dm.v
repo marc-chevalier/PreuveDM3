@@ -119,13 +119,10 @@ Proof.
     omega.
 
     intros.
-    unfold epsilon_for_finite in H.
-    simpl in H.
     destruct x.
     destruct p.
     rewrite<- H.
     simpl.
-    unfold epsilon_for_finite in IHk.
 Admitted.
 
 Lemma finites_are_omniscient : forall k, omniscient (finite_setoid k).
