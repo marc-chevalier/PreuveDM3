@@ -92,6 +92,16 @@ refine (mkSetoid (set := { x | x ≤ k}) (R := (fun x y => proj1_sig x = proj1_s
 split; [auto | auto | intros; apply eq_trans with (y := proj1_sig y); auto].
 Defined.
 
+Fixpoint epsilon_for_finite (x : nat) {k : nat} (p : set (arrow_setoid (finite_setoid k) bool_setoid)) : set (finite_setoid k) :=
+  match x with
+    0 => exist (fun x => x ≤ k) 0 (le_0_n k)
+  | S y =>
+    match (proj1_sig p (exist (fun x => x ≤ k) k (le_refl k))) with
+      true => epsilon_for_finite y p
+    | false => exist (fun x => x ≤ k) k (le_refl k)
+  end
+end.
+
 Lemma finites_are_omniscient : forall k, omniscient (finite_setoid k).
 Proof.
   intros.
@@ -99,7 +109,27 @@ Proof.
 
   (* On prouve que les "finites" sont "searchable" *)
   unfold searchable.
-Admitted.
+  exists (epsilon_for_finite k).
+  induction k.
+    intros.
+    unfold epsilon_for_finite in H.
+    intros.
+    destruct x.
+    destruct p.
+    rewrite <-H.
+    apply e.
+    simpl.
+    omega.
+
+    intros.
+    unfold epsilon_for_finite in H.
+    simpl in H.
+    destruct x.
+    destruct p.
+    rewrite<- H.
+    simpl.
+    unfold epsilon_for_finite in IHk.
+Qed.
 
 (* Question 5. *)
 Fixpoint min (f : nat → bool) (n:nat) :=
